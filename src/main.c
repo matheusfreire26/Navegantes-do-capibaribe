@@ -8,11 +8,14 @@ int main(void) {
     char caminho[64];
     snprintf(caminho, sizeof(caminho), "assets/abertura/%d.png", i + 1);
     e.anim_frames[i] = LoadTexture(caminho);
-    }
+}
+
+// Carrega menu — coloque o nome correto do seu PNG
+e.mapa     = LoadTexture("assets/9.png");
     e.anim_frame_atual    = 0;
     e.anim_frame_timer    = 0.0f;
     e.anim_frame_duracao  = 0.1f;
-    e.anim_duracao        = 9 * 0.1f;
+    e.anim_duracao        = 9 * 1.0f;
     e.cena_atual  = CENA_ANIMACAO;
     e.menu_opcao  = 0;
     SetTargetFPS(60);
@@ -33,7 +36,6 @@ int main(void) {
 
     for (int i = 0; i < 9; i++)
     UnloadTexture(e.anim_frames[i]);
-    
     CloseWindow();
 
     return 0;

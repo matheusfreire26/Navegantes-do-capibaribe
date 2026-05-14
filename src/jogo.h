@@ -53,13 +53,12 @@ typedef struct {
     Texture2D anim_frames[9];
     int   anim_frame_atual;
     float anim_frame_timer;
-    float anim_frame_duracao;  // ← estava faltando
+    float anim_frame_duracao;  
     float anim_duracao;
-    Cena  cena_atual;          // ← estava faltando
-    int   menu_opcao;          // ← estava faltando
+    Cena  cena_atual;          
+    int   menu_opcao;     
 } EstadoJogo;
 
-// ─── lista.c ─────────────────────────────────────────────────────────────────
 PontoTuristico *criar_parada(const char *nome, const char *subtitulo,
                               const char *artefato, Vector2 pos);
 void construir_rio(EstadoJogo *e);
@@ -67,7 +66,6 @@ void liberar_rio(EstadoJogo *e);
 void remar_frente(EstadoJogo *e);
 void remar_volta(EstadoJogo *e);
 
-// ─── render.c ────────────────────────────────────────────────────────────────
 void desenhar_mapa(EstadoJogo *e);
 void desenhar_nos(EstadoJogo *e);
 void desenhar_barco(EstadoJogo *e);
@@ -76,7 +74,6 @@ void desenhar_titulo(EstadoJogo *e);
 void desenhar_animacao(EstadoJogo *e);
 void desenhar_menu(EstadoJogo *e);
 
-// ─── jogo.c ──────────────────────────────────────────────────────────────────
 void processar_input(EstadoJogo *e);
 void atualizar(EstadoJogo *e);
 void renderizar(EstadoJogo *e);

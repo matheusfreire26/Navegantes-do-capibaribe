@@ -121,28 +121,15 @@ void desenhar_animacao(EstadoJogo *e) {
 }
 
 void desenhar_menu(EstadoJogo *e) {
-    // Fundo: mapa com overlay escuro
-    DrawTexturePro(e->mapa,
-        (Rectangle){0, 0, (float)e->mapa.width, (float)e->mapa.height},
+    ClearBackground(BLACK);
+    DrawTexturePro(e->anim_frames[8],
+        (Rectangle){0, 0, (float)e->anim_frames[8].width, (float)e->anim_frames[8].height},
         (Rectangle){0, 0, LARGURA, ALTURA},
         (Vector2){0, 0}, 0.0f, WHITE);
-    DrawRectangle(0, 0, LARGURA, ALTURA, (Color){0, 0, 0, 150});
 
-    // Título
-    const char *titulo = "NAVEGANTES DO CAPIBARIBE";
-    Vector2 sz = MeasureTextEx(e->fonte, titulo, 32, 2);
-    DrawTextEx(e->fonte, titulo,
-               (Vector2){LARGURA/2 - sz.x/2, 120},
-               32, 2, COR_TITULO);
-
-    // Opções
-    const char *opcoes[] = {"Novo Jogo", "Continuar", "Sair"};
-    for (int i = 0; i < 3; i++) {
-        Color cor = (e->menu_opcao == i) ? COR_NO_ATIVO : COR_TEXTO;
-        int   tam = (e->menu_opcao == i) ? 24 : 20;
-        Vector2 so = MeasureTextEx(e->fonte, opcoes[i], tam, 1);
-        DrawTextEx(e->fonte, opcoes[i],
-                   (Vector2){LARGURA/2 - so.x/2, 280 + i * 60},
-                   tam, 1, cor);
-    }
+    // TEMPORÁRIO — coordenadas do mouse
+    Vector2 mouse = GetMousePosition();
+    char pos[64];
+    snprintf(pos, sizeof(pos), "X: %.0f  Y: %.0f", mouse.x, mouse.y);
+    DrawText(pos, 10, 10, 20, RED);
 }

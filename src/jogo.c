@@ -14,8 +14,29 @@ void atualizar(EstadoJogo *e) {
         if (e->anim_frame_timer >= e->anim_frame_duracao) {
             e->anim_frame_timer = 0.0f;
             e->anim_frame_atual++;
-            if (e->anim_frame_atual >= 9)
+            if (e->anim_frame_atual >= 9) {
+                e->anim_frame_atual = 8;
                 e->cena_atual = CENA_MENU;
+            }
+        }
+        return;
+    }
+
+    if (e->cena_atual == CENA_MENU) {
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            Vector2 mouse = GetMousePosition();
+
+            // Iniciar — ajuste os valores depois de anotar as coordenadas
+            if (CheckCollisionPointRec(mouse, (Rectangle){400, 280, 200, 50}))
+                e->cena_atual = CENA_MAPA;
+
+            // Carregar — ajuste os valores
+            if (CheckCollisionPointRec(mouse, (Rectangle){400, 350, 200, 50}))
+                e->cena_atual = CENA_MAPA;
+
+            // Opções — ajuste os valores
+            if (CheckCollisionPointRec(mouse, (Rectangle){400, 420, 200, 50}))
+                e->cena_atual = CENA_MAPA; // trocar por CENA_OPCOES depois
         }
         return;
     }
