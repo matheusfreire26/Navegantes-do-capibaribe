@@ -3,7 +3,10 @@
 int main(void) {
     EstadoJogo e = {0};
 
-    InitWindow(LARGURA, ALTURA, "Navegantes do Capibaribe");
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_FULLSCREEN_MODE);
+    InitWindow(0, 0, "Navegantes do Capibaribe");
+    e.target = LoadRenderTexture(LARGURA, ALTURA);
+    SetTextureFilter(e.target.texture, TEXTURE_FILTER_BILINEAR);
     for (int i = 0; i < 9; i++) {
     char caminho[64];
     snprintf(caminho, sizeof(caminho), "assets/abertura/%d.png", i + 1);
@@ -33,9 +36,9 @@ e.mapa     = LoadTexture("assets/9.png");
 
     liberar_rio(&e);
     UnloadTexture(e.mapa);
-
     for (int i = 0; i < 9; i++)
-    UnloadTexture(e.anim_frames[i]);
+        UnloadTexture(e.anim_frames[i]);
+    UnloadRenderTexture(e.target);
     CloseWindow();
 
     return 0;

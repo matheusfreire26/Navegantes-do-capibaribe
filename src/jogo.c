@@ -24,7 +24,12 @@ void atualizar(EstadoJogo *e) {
 
     if (e->cena_atual == CENA_MENU) {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            Vector2 mouse = GetMousePosition();
+            int sw = GetScreenWidth(), sh = GetScreenHeight();
+            float escala = fminf((float)sw / LARGURA, (float)sh / ALTURA);
+            float ox = (sw - LARGURA * escala) / 2.0f;
+            float oy = (sh - ALTURA * escala) / 2.0f;
+            Vector2 raw = GetMousePosition();
+            Vector2 mouse = {(raw.x - ox) / escala, (raw.y - oy) / escala};
 
             // Iniciar — ajuste os valores depois de anotar as coordenadas
             if (CheckCollisionPointRec(mouse, (Rectangle){400, 280, 200, 50}))
@@ -50,18 +55,31 @@ void atualizar(EstadoJogo *e) {
     }
 }
 void renderizar(EstadoJogo *e) {
-    BeginDrawing();
+    // Desenha tudo na tela virtual 1024×600
+    BeginTextureMode(e->target);
     if (e->cena_atual == CENA_ANIMACAO) {
         desenhar_animacao(e);
     } else if (e->cena_atual == CENA_MENU) {
         desenhar_menu(e);
     } else {
-        desenhar_mapa(e);
-        desenhar_nos(e);
-        desenhar_barco(e);
-        desenhar_titulo(e);
-        desenhar_painel(e);
+        ClearBackground(BLACK);
     }
     DrawFPS(LARGURA - 70, 8);
+    EndTextureMode();
+
+    // Escala a tela virtual para preencher a janela real
+    int sw = GetScreenWidth();
+    int sh = GetScreenHeight();
+    float escala = fminf((float)sw / LARGURA, (float)sh / ALTURA);
+    float ox = (sw - LARGURA * escala) / 2.0f;
+    float oy = (sh - ALTURA * escala) / 2.0f;
+
+    BeginDrawing();
+    ClearBackground(BLACK);
+    DrawTexturePro(
+        e->target.texture,
+        (Rectangle){0, 0, LARGURA, -ALTURA},   // -ALTURA corrige o flip do RenderTexture
+        (Rectangle){ox, oy, LARGURA * escala, ALTURA * escala},
+        (Vector2){0, 0}, 0.0f, WHITE);
     EndDrawing();
 }

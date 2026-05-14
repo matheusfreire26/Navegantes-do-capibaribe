@@ -55,8 +55,9 @@ typedef struct {
     float anim_frame_timer;
     float anim_frame_duracao;  
     float anim_duracao;
-    Cena  cena_atual;          
-    int   menu_opcao;     
+    Cena  cena_atual;
+    int   menu_opcao;
+    RenderTexture2D target;
 } EstadoJogo;
 
 PontoTuristico *criar_parada(const char *nome, const char *subtitulo,
@@ -66,11 +67,6 @@ void liberar_rio(EstadoJogo *e);
 void remar_frente(EstadoJogo *e);
 void remar_volta(EstadoJogo *e);
 
-void desenhar_mapa(EstadoJogo *e);
-void desenhar_nos(EstadoJogo *e);
-void desenhar_barco(EstadoJogo *e);
-void desenhar_painel(EstadoJogo *e);
-void desenhar_titulo(EstadoJogo *e);
 void desenhar_animacao(EstadoJogo *e);
 void desenhar_menu(EstadoJogo *e);
 
