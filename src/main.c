@@ -26,7 +26,7 @@ int main(void) {
     e.mapa  = LoadTexture("assets/mapa.png");
     
     // ─── ALTERAÇÃO 1: Carrega a imagem do cenário do tutorial ────────────────
-    e.cenario_fundo = LoadTexture("assets/tutorial.png");
+    e.cenario_fundo = LoadTexture("assets/abertura/tutorial.png");
 
     construir_rio(&e);
 
