@@ -25,7 +25,9 @@
 typedef enum {
     CENA_ANIMACAO,
     CENA_MENU,
-    CENA_MAPA
+    CENA_MAPA,
+    CENA_TUTORIAL,
+    CENA_GAMEPLAY
 } Cena;
 
 // ─── Estrutura do nó ─────────────────────────────────────────────────────────
@@ -58,6 +60,10 @@ typedef struct {
     Cena  cena_atual;
     int   menu_opcao;
     RenderTexture2D target;
+    Vector2 jogador_pos;
+    float jogador_vel;
+    Texture2D jogador_tex;
+    Texture2D cenario_fundo;
 } EstadoJogo;
 
 PontoTuristico *criar_parada(const char *nome, const char *subtitulo,
@@ -69,6 +75,10 @@ void remar_volta(EstadoJogo *e);
 
 void desenhar_animacao(EstadoJogo *e);
 void desenhar_menu(EstadoJogo *e);
+
+void desenhar_tutorial(EstadoJogo *e);
+void desenhar_gameplay(EstadoJogo *e);
+void desenhar_mapa(EstadoJogo *e);
 
 void processar_input(EstadoJogo *e);
 void atualizar(EstadoJogo *e);

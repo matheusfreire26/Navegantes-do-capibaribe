@@ -1,14 +1,18 @@
 #include "jogo.h"
 
 void processar_input(EstadoJogo *e) {
-    if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) remar_frente(e);
-    if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT))  remar_volta(e);
+    // Garante que os comandos do barco só funcionam quando estiver de fato no mapa
+    if (e->cena_atual == CENA_MAPA) {
+        if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) remar_frente(e);
+        if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT))  remar_volta(e);
+    }
 }
 
 void atualizar(EstadoJogo *e) {
     float dt  = GetFrameTime();
     e->timer += dt;
 
+    // ─── 1. ANIMAÇÃO DE ABERTURA ─────────────────────────────────────────────
     if (e->cena_atual == CENA_ANIMACAO) {
         e->anim_frame_timer += dt;
         if (e->anim_frame_timer >= e->anim_frame_duracao) {
@@ -22,6 +26,7 @@ void atualizar(EstadoJogo *e) {
         return;
     }
 
+    // ─── 2. MENU PRINCIPAL ───────────────────────────────────────────────────
     if (e->cena_atual == CENA_MENU) {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             int sw = GetScreenWidth(), sh = GetScreenHeight();
@@ -31,21 +36,47 @@ void atualizar(EstadoJogo *e) {
             Vector2 raw = GetMousePosition();
             Vector2 mouse = {(raw.x - ox) / escala, (raw.y - oy) / escala};
 
-            // Iniciar — ajuste os valores depois de anotar as coordenadas
-            if (CheckCollisionPointRec(mouse, (Rectangle){400, 280, 200, 50}))
-                e->cena_atual = CENA_MAPA;
-
-            // Carregar — ajuste os valores
-            if (CheckCollisionPointRec(mouse, (Rectangle){400, 350, 200, 50}))
-                e->cena_atual = CENA_MAPA;
-
-            // Opções — ajuste os valores
-            if (CheckCollisionPointRec(mouse, (Rectangle){400, 420, 200, 50}))
-                e->cena_atual = CENA_MAPA; // trocar por CENA_OPCOES depois
+            // CORREÇÃO DO CLIQUE: Como o clique em "Opções" (mais abaixo) ativou o Y entre 300 e 400,
+            // o botão "Iniciar" está localizado mais acima na tela. Ajustamos o Y para capturar a faixa de 180 a 290.
+            if (mouse.x >= 510 && mouse.x <= 760 && mouse.y >= 180 && mouse.y <= 290) {
+                e->cena_atual = CENA_TUTORIAL; 
+                
+                // Configurações iniciais do jogador para o teste de mobilidade
+                e->jogador_pos = (Vector2){ 512, 480 }; 
+                e->jogador_vel = 250.0f; 
+                e->timer = 0.0f; 
+            }
         }
         return;
     }
 
+    // ─── 3. TELA DE TUTORIAL ─────────────────────────────────────────────────
+    if (e->cena_atual == CENA_TUTORIAL) {
+        // Ao clicar ESPAÇO ou ENTER, altera o estado diretamente para a gameplay limpa
+        if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) {
+            e->cena_atual = CENA_GAMEPLAY;
+        }
+        return;
+    }
+
+    // ─── 4. FASE DE GAMEPLAY (TESTES DE MOBILIDADE) ──────────────────────────
+    if (e->cena_atual == CENA_GAMEPLAY) {
+        // Movimentação horizontal do círculo do personagem usando A/D ou Setas
+        if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
+            e->jogador_pos.x -= e->jogador_vel * dt;
+        }
+        if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
+            e->jogador_pos.x += e->jogador_vel * dt;
+        }
+
+        // Impede o boneco de sair para fora das bordas laterais do cais
+        if (e->jogador_pos.x < 30) e->jogador_pos.x = 30;
+        if (e->jogador_pos.x > LARGURA - 30) e->jogador_pos.x = LARGURA - 30;
+        
+        return;
+    }
+
+    // ─── 5. MAPA DO RIO CAPIBARIBE ───────────────────────────────────────────
     if (e->cena_atual == CENA_MAPA) {
         float alvo_y = e->atual->pos.y - 20.0f;
         e->barco_x  += (e->barco_alvo_x - e->barco_x) * 5.0f * dt;
@@ -54,20 +85,27 @@ void atualizar(EstadoJogo *e) {
             e->animando = false;
     }
 }
+
 void renderizar(EstadoJogo *e) {
-    // Desenha tudo na tela virtual 1024×600
     BeginTextureMode(e->target);
+    
     if (e->cena_atual == CENA_ANIMACAO) {
         desenhar_animacao(e);
     } else if (e->cena_atual == CENA_MENU) {
         desenhar_menu(e);
+    } else if (e->cena_atual == CENA_TUTORIAL) {
+        desenhar_tutorial(e);
+    } else if (e->cena_atual == CENA_GAMEPLAY) {
+        desenhar_gameplay(e); 
+    } else if (e->cena_atual == CENA_MAPA) {
+        desenhar_mapa(e);
     } else {
         ClearBackground(BLACK);
     }
+    
     DrawFPS(LARGURA - 70, 8);
     EndTextureMode();
 
-    // Escala a tela virtual para preencher a janela real
     int sw = GetScreenWidth();
     int sh = GetScreenHeight();
     float escala = fminf((float)sw / LARGURA, (float)sh / ALTURA);
@@ -78,7 +116,7 @@ void renderizar(EstadoJogo *e) {
     ClearBackground(BLACK);
     DrawTexturePro(
         e->target.texture,
-        (Rectangle){0, 0, LARGURA, -ALTURA},   // -ALTURA corrige o flip do RenderTexture
+        (Rectangle){0, 0, LARGURA, -ALTURA},
         (Rectangle){ox, oy, LARGURA * escala, ALTURA * escala},
         (Vector2){0, 0}, 0.0f, WHITE);
     EndDrawing();

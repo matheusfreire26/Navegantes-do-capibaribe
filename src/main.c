@@ -7,14 +7,13 @@ int main(void) {
     InitWindow(0, 0, "Navegantes do Capibaribe");
     e.target = LoadRenderTexture(LARGURA, ALTURA);
     SetTextureFilter(e.target.texture, TEXTURE_FILTER_BILINEAR);
+    
     for (int i = 0; i < 9; i++) {
-    char caminho[64];
-    snprintf(caminho, sizeof(caminho), "assets/abertura/%d.png", i + 1);
-    e.anim_frames[i] = LoadTexture(caminho);
-}
+        char caminho[64];
+        snprintf(caminho, sizeof(caminho), "assets/abertura/%d.png", i + 1);
+        e.anim_frames[i] = LoadTexture(caminho);
+    }
 
-// Carrega menu — coloque o nome correto do seu PNG
-e.mapa     = LoadTexture("assets/9.png");
     e.anim_frame_atual    = 0;
     e.anim_frame_timer    = 0.0f;
     e.anim_frame_duracao  = 0.1f;
@@ -25,6 +24,9 @@ e.mapa     = LoadTexture("assets/9.png");
 
     e.fonte = GetFontDefault();
     e.mapa  = LoadTexture("assets/mapa.png");
+    
+    // ─── ALTERAÇÃO 1: Carrega a imagem do cenário do tutorial ────────────────
+    e.cenario_fundo = LoadTexture("assets/tutorial.png");
 
     construir_rio(&e);
 
@@ -36,8 +38,13 @@ e.mapa     = LoadTexture("assets/9.png");
 
     liberar_rio(&e);
     UnloadTexture(e.mapa);
+    
+    // ─── ALTERAÇÃO 2: Descarrega a imagem da memória ao fechar o jogo ────────
+    UnloadTexture(e.cenario_fundo);
+
     for (int i = 0; i < 9; i++)
         UnloadTexture(e.anim_frames[i]);
+        
     UnloadRenderTexture(e.target);
     CloseWindow();
 
