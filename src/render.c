@@ -58,20 +58,65 @@ void desenhar_tutorial(EstadoJogo *e) {
 }
 
 void desenhar_gameplay(EstadoJogo *e) {
+    // SE A FILA ESTIVER VAZIA: Desenha a tela de tutorial original do seu colega
+    if (fila_vazia(&e->fila_ondas)) {
+        ClearBackground(BLACK);
+
+        if (e->cenario_fundo.id > 0) {
+            DrawTexturePro(e->cenario_fundo,
+                (Rectangle){0, 0, (float)e->cenario_fundo.width, (float)e->cenario_fundo.height},
+                (Rectangle){0, 0, LARGURA, ALTURA},
+                (Vector2){0, 0}, 0.0f, WHITE);
+        } else {
+            DrawText("ERRO: tutorial.png nao encontrada em assets/abertura/", 150, ALTURA/2, 20, RED);
+        }
+
+        // Desenha o jogador (Círculo Azul) controlável do seu colega
+        DrawCircleV(e->jogador_pos, 20, BLUE); 
+        DrawCircleLinesV(e->jogador_pos, 20, WHITE);
+        return;
+    }
+
+    // SE A FILA TIVER INIMIGOS: Entra a sua tela da Missão 1 - Marco Zero
     ClearBackground(BLACK);
 
-    // Se a textura foi carregada corretamente lá do novo caminho, renderiza ela limpa
-    if (e->cenario_fundo.id > 0) {
-        DrawTexturePro(e->cenario_fundo,
-            (Rectangle){0, 0, (float)e->cenario_fundo.width, (float)e->cenario_fundo.height},
+    if (e->jogador_tex.id > 0) {
+        DrawTexturePro(e->jogador_tex,
+            (Rectangle){0, 0, (float)e->jogador_tex.width, (float)e->jogador_tex.height},
             (Rectangle){0, 0, LARGURA, ALTURA},
             (Vector2){0, 0}, 0.0f, WHITE);
     } else {
-        // Diagnóstico visual caso ainda dê algum erro de carregamento
-        DrawText("ERRO: tutorial.png nao encontrada em assets/abertura/", 150, ALTURA/2, 20, RED);
+        DrawText("ERRO: marco_zero.png nao encontrada em assets/", 150, ALTURA/2, 20, RED);
     }
 
-    // Desenha o jogador (Círculo Azul) controlável sobre a imagem
-    DrawCircleV(e->jogador_pos, 20, BLUE); 
-    DrawCircleLinesV(e->jogador_pos, 20, WHITE);
+    DrawCircle(512, 380, 25, PURPLE);
+    DrawText("CHICO", 485, 415, 16, WHITE);
+
+    Inimigo *atual = peek_inimigo(&e->fila_ondas);
+    if (atual != NULL) {
+        Color cor_inimigo = (atual->id == 99) ? RED : MAROON;
+        DrawCircle(512, 132, 22, cor_inimigo);
+        DrawText(atual->nome, 420, 75, 20, LIGHTGRAY);
+        
+        DrawRectangle(412, 100, 200, 15, BLACK);
+        float perc_hp_inimigo = (float)atual->hp / atual->hp_max;
+        DrawRectangle(412, 100, (int)(200 * perc_hp_inimigo), 15, RED);
+    }
+
+    Rectangle painel_hud = { 40, 450, LARGURA - 80, 130 };
+    DrawRectangleRec(painel_hud, (Color){10, 10, 15, 240});
+    DrawRectangleLinesEx(painel_hud, 2, COR_TITULO);
+
+    DrawText(TextFormat("CHICO SCIENCE HP: %d/%d", e->chico_hp, e->chico_hp_max), 60, 465, 22, COR_TEXTO);
+    DrawText(TextFormat("Casaroes Preservados: %d/3", e->casaroes_salvos), 60, 500, 18, COR_TITULO);
+    DrawText(TextFormat("Inimigos Restantes na Fila: %d", e->fila_ondas.tamanho), 60, 530, 16, GRAY);
+
+    DrawText(e->log_combate, 450, 465, 16, ORANGE);
+
+    if (e->turno_jogador) {
+        DrawText("[1] Atacar (Guitarra)", 720, 510, 20, GREEN);
+        DrawText("[2] Postura Defensiva", 720, 540, 20, COR_TEXTO);
+    } else {
+        DrawText("Aguardando ataque inimigo...", 720, 525, 18, RED);
+    }
 }

@@ -30,6 +30,25 @@ typedef enum {
     CENA_GAMEPLAY
 } Cena;
 
+typedef struct Inimigo {
+    int id;
+    int hp;
+    int hp_max;
+    int dano;
+    char nome[32];
+} Inimigo;
+
+typedef struct NodeInimigo {
+    Inimigo dado;
+    struct NodeInimigo *proximo;
+} NodeInimigo;
+
+typedef struct {
+    NodeInimigo *frente;
+    NodeInimigo *tras;
+    int tamanho;
+} FilaInimigos;
+
 // ─── Estrutura do nó ─────────────────────────────────────────────────────────
 typedef struct PontoTuristico {
     char nome[100];
@@ -64,6 +83,13 @@ typedef struct {
     float jogador_vel;
     Texture2D jogador_tex;
     Texture2D cenario_fundo;
+    int chico_hp;
+    int chico_hp_max;
+    FilaInimigos fila_ondas;
+    bool turno_jogador;
+    char log_combate[128];
+    float tempo_missao;
+    int casaroes_salvos;
 } EstadoJogo;
 
 PontoTuristico *criar_parada(const char *nome, const char *subtitulo,
@@ -83,5 +109,16 @@ void desenhar_mapa(EstadoJogo *e);
 void processar_input(EstadoJogo *e);
 void atualizar(EstadoJogo *e);
 void renderizar(EstadoJogo *e);
+
+void inicializar_fila(FilaInimigos *f);
+void enqueue_inimigo(FilaInimigos *f, Inimigo info);
+void dequeue_inimigo(FilaInimigos *f);
+Inimigo* peek_inimigo(FilaInimigos *f);
+int fila_vazia(FilaInimigos *f);
+void limpar_fila(FilaInimigos *f);
+
+void iniciar_missao_1(EstadoJogo *e);
+void processar_input_missao1(EstadoJogo *e);
+void atualizar_missao1(EstadoJogo *e, float dt);
 
 #endif
