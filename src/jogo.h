@@ -84,6 +84,9 @@ typedef struct {
     Texture2D jogador_tex;
     Texture2D cenario_fundo;
     Texture2D sprite_jogador;
+    int jogador_frame;
+    int jogador_direcao;
+    float jogador_timer;
     int chico_hp;
     int chico_hp_max;
     FilaInimigos fila_ondas;

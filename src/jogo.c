@@ -64,9 +64,68 @@ void atualizar(EstadoJogo *e) {
     }
 
     // ─── 4. FASE DE GAMEPLAY ─────────────────────────────────────────────────
+    // ─── 4. FASE DE GAMEPLAY ─────────────────────────────────────────────────
     if (e->cena_atual == CENA_GAMEPLAY) {
         if (!fila_vazia(&e->fila_ondas)) {
+            // Se tiver inimigos na fila, roda a lógica de combate do seu amigo
             atualizar_missao1(e, dt);
+        } else {
+            // ─── MOVIMENTAÇÃO DO CHICO NO CAIS (Fila Vazia) ───
+            float velocidade = 200.0f; // Velocidade em pixels por segundo
+            bool movendo = false;
+
+            // Se as variáveis de animação não existirem na struct, a Raylib cria esses campos sem travar,
+            // mas por segurança garantimos que comecem com valores válidos:
+            if (e->jogador_frame < 2 || e->jogador_frame > 5) {
+                e->jogador_frame = 2; // Coluna 2 é o Chico visível parado
+            }
+
+            // Ler as teclas de direção (Setas ou WASD)
+            if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
+                e->jogador_pos.x += velocidade * dt;
+                e->jogador_direcao = 2; // Linha 2 (Direita)
+                movendo = true;
+            }
+            else if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
+                e->jogador_pos.x -= velocidade * dt;
+                e->jogador_direcao = 3; // Código 3 (vamos usar para espelhar a direita no render.c)
+                movendo = true;
+            }
+
+            if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) {
+                e->jogador_pos.y += velocidade * dt;
+                e->jogador_direcao = 0; // Linha 0 (Frente)
+                movendo = true;
+            }
+            else if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) {
+                e->jogador_pos.y -= velocidade * dt;
+                e->jogador_direcao = 1; // Linha 1 (Costas)
+                movendo = true;
+            }
+
+            // Controle da Animação das pernas caminhando
+            if (movendo) {
+                e->jogador_timer += dt;
+                if (e->jogador_timer >= 0.12f) { // Velocidade da troca de passos
+                    e->jogador_timer = 0.0f;
+                    e->jogador_frame++;
+                    
+                    // As colunas de caminhada válidas na sua folha vão da 2 até a 5
+                    if (e->jogador_frame > 5) {
+                        e->jogador_frame = 2; 
+                    }
+                }
+            } else {
+                // Se o jogador parar, ele volta para o frame parado (Coluna 2)
+                e->jogador_frame = 2;
+            }
+
+            /// Bloqueio físico exato para o cais do vídeo
+            if (e->jogador_pos.x < 40.0f)   e->jogador_pos.x = 40.0f;  // Canto esquerdo
+            if (e->jogador_pos.x < 40.0f)   e->jogador_pos.x = 40.0f;  // Canto esquerdo
+            if (e->jogador_pos.x > 980.0f)  e->jogador_pos.x = 980.0f; // Canto direito
+            if (e->jogador_pos.y < 350.0f)  e->jogador_pos.y = 350.0f; // Limite perto da mureta/água
+            if (e->jogador_pos.y > 490.0f)  e->jogador_pos.y = 490.0f; // Limite antes de sumir nas plantas de baixo
         }
         return;
     }

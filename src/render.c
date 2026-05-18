@@ -58,15 +58,20 @@ void desenhar_tutorial(EstadoJogo *e) {
 }
 
 void desenhar_gameplay(EstadoJogo *e) {
-    // Calcula as dimensões de um único frame recortado do Chico (Grade de 8 colunas x 3 linhas)
-    float frame_largura = 0.0f;
-    float frame_altura = 0.0f;
-    if (e->sprite_jogador.id > 0) {
-        frame_largura = (float)e->sprite_jogador.width / 8.0f;
-        frame_altura = (float)e->sprite_jogador.height / 3.0f;
+    if (e->sprite_jogador.id == 0) {
+        e->sprite_jogador = LoadTexture("assets/abertura/personagem.png");
     }
 
-    // ─── MOMENTO 1: SE A FILA ESTIVER VAZIA (Cais Livre) ───────────────────
+    // Calcula as dimensões de um único frame recortado do Chico
+    float frame_largura = 0.0f;
+    float frame_altura = 0.0f;
+    
+    if (e->sprite_jogador.id > 0) {
+        frame_largura = (float)e->sprite_jogador.width / 8.0f;
+        frame_altura = (float)e->sprite_jogador.height / 3.0f; 
+    }
+
+    // ─── MOMENTO 1: SE A FILA ESTIVER VAZIA (Cais Livre para andar) ────────
     if (fila_vazia(&e->fila_ondas)) {
         ClearBackground(BLACK);
 
@@ -75,27 +80,37 @@ void desenhar_gameplay(EstadoJogo *e) {
                 (Rectangle){0, 0, (float)e->cenario_fundo.width, (float)e->cenario_fundo.height},
                 (Rectangle){0, 0, LARGURA, ALTURA},
                 (Vector2){0, 0}, 0.0f, WHITE);
-        } else {
-            DrawText("ERRO: tutorial.png nao encontrada em assets/abertura/", 150, ALTURA/2, 20, RED);
         }
 
-        // TROCA DA BOLA AZUL PELO CHICO SCIENCE:
+        // DESENHO DO CHICO:
         if (e->sprite_jogador.id > 0) {
-            // Pega o primeiro boneco da folha (Coluna 0, Linha 0 -> Parado de frente)
-            Rectangle origem = { 0.0f, 0.0f, frame_largura, frame_altura };
+            if (e->jogador_frame == 0) e->jogador_frame = 2; 
+
+            float posX_na_imagem = e->jogador_frame * frame_largura;
+            float posY_na_imagem = e->jogador_direcao * frame_altura;
+
+            float largura_recorte = frame_largura;
+            if (e->jogador_direcao == 3) { 
+                posY_na_imagem = 2 * frame_altura; 
+                largura_recorte = -frame_largura; 
+            }
+
+            Rectangle origem = { posX_na_imagem, posY_na_imagem, largura_recorte, frame_altura };
             
-            // Desenha ele centralizado na posição do jogador
+            float escala = 1.2f;
+            float largura_final = frame_largura * escala;
+            float altura_final = frame_altura * escala;
+
             Rectangle destino = { 
-                e->jogador_pos.x - frame_largura, 
-                e->jogador_pos.y - frame_altura * 2.0f, 
-                frame_largura * 2.0f, // Zoom clássico em pixel art
-                frame_altura * 2.0f 
-            };
+                e->jogador_pos.x - (largura_final / 2.0f), 
+                e->jogador_pos.y - altura_final, 
+                largura_final, 
+                altura_final 
+            }; 
+            // Deixamos o pivô em (0,0) para evitar que o espelhamento jogue o Chico para fora da tela
             DrawTexturePro(e->sprite_jogador, origem, destino, (Vector2){0, 0}, 0.0f, WHITE);
         } else {
-            // Código reserva caso a imagem suma por acidente
             DrawCircleV(e->jogador_pos, 20, BLUE); 
-            DrawCircleLinesV(e->jogador_pos, 20, WHITE);
         }
         return;
     }
@@ -114,13 +129,19 @@ void desenhar_gameplay(EstadoJogo *e) {
 
     // TROCA DO CÍRCULO ROXO PELO CHICO SCIENCE NO MEIO DA ARENA:
     if (e->sprite_jogador.id > 0) {
-        Rectangle origem = { 0.0f, 0.0f, frame_largura, frame_altura };
+        Rectangle origem = { 2 * frame_largura, 0.0f, frame_largura, frame_altura };
+        
+        float escala = 1.2f; // Mesma escala do cais
+        float largura_final = frame_largura * escala;
+        float altura_final = frame_altura * escala;
+
         Rectangle destino = { 
-            512.0f - frame_largura, 
-            380.0f - frame_altura * 1.5f, 
-            frame_largura * 2.0f, 
-            frame_altura * 2.0f 
+            512.0f - (largura_final / 2.0f), 
+            380.0f - altura_final, 
+            largura_final, 
+            altura_final 
         };
+        
         DrawTexturePro(e->sprite_jogador, origem, destino, (Vector2){0, 0}, 0.0f, WHITE);
         DrawText("CHICO SCIENCE", 450, 395, 16, GOLD);
     } else {
