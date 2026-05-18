@@ -83,6 +83,7 @@ typedef struct {
     float jogador_vel;
     Texture2D jogador_tex;
     Texture2D cenario_fundo;
+    Texture2D sprite_jogador;
     int chico_hp;
     int chico_hp_max;
     FilaInimigos fila_ondas;

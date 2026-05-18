@@ -58,7 +58,15 @@ void desenhar_tutorial(EstadoJogo *e) {
 }
 
 void desenhar_gameplay(EstadoJogo *e) {
-    // SE A FILA ESTIVER VAZIA: Desenha a tela de tutorial original do seu colega
+    // Calcula as dimensões de um único frame recortado do Chico (Grade de 8 colunas x 3 linhas)
+    float frame_largura = 0.0f;
+    float frame_altura = 0.0f;
+    if (e->sprite_jogador.id > 0) {
+        frame_largura = (float)e->sprite_jogador.width / 8.0f;
+        frame_altura = (float)e->sprite_jogador.height / 3.0f;
+    }
+
+    // ─── MOMENTO 1: SE A FILA ESTIVER VAZIA (Cais Livre) ───────────────────
     if (fila_vazia(&e->fila_ondas)) {
         ClearBackground(BLACK);
 
@@ -71,13 +79,28 @@ void desenhar_gameplay(EstadoJogo *e) {
             DrawText("ERRO: tutorial.png nao encontrada em assets/abertura/", 150, ALTURA/2, 20, RED);
         }
 
-        // Desenha o jogador (Círculo Azul) controlável do seu colega
-        DrawCircleV(e->jogador_pos, 20, BLUE); 
-        DrawCircleLinesV(e->jogador_pos, 20, WHITE);
+        // TROCA DA BOLA AZUL PELO CHICO SCIENCE:
+        if (e->sprite_jogador.id > 0) {
+            // Pega o primeiro boneco da folha (Coluna 0, Linha 0 -> Parado de frente)
+            Rectangle origem = { 0.0f, 0.0f, frame_largura, frame_altura };
+            
+            // Desenha ele centralizado na posição do jogador
+            Rectangle destino = { 
+                e->jogador_pos.x - frame_largura, 
+                e->jogador_pos.y - frame_altura * 2.0f, 
+                frame_largura * 2.0f, // Zoom clássico em pixel art
+                frame_altura * 2.0f 
+            };
+            DrawTexturePro(e->sprite_jogador, origem, destino, (Vector2){0, 0}, 0.0f, WHITE);
+        } else {
+            // Código reserva caso a imagem suma por acidente
+            DrawCircleV(e->jogador_pos, 20, BLUE); 
+            DrawCircleLinesV(e->jogador_pos, 20, WHITE);
+        }
         return;
     }
 
-    // SE A FILA TIVER INIMIGOS: Entra a sua tela da Missão 1 - Marco Zero
+    // ─── MOMENTO 2: SE A FILA TIVER INIMIGOS (Combate no Marco Zero) ────────
     ClearBackground(BLACK);
 
     if (e->jogador_tex.id > 0) {
@@ -89,9 +112,23 @@ void desenhar_gameplay(EstadoJogo *e) {
         DrawText("ERRO: marco_zero.png nao encontrada em assets/", 150, ALTURA/2, 20, RED);
     }
 
-    DrawCircle(512, 380, 25, PURPLE);
-    DrawText("CHICO", 485, 415, 16, WHITE);
+    // TROCA DO CÍRCULO ROXO PELO CHICO SCIENCE NO MEIO DA ARENA:
+    if (e->sprite_jogador.id > 0) {
+        Rectangle origem = { 0.0f, 0.0f, frame_largura, frame_altura };
+        Rectangle destino = { 
+            512.0f - frame_largura, 
+            380.0f - frame_altura * 1.5f, 
+            frame_largura * 2.0f, 
+            frame_altura * 2.0f 
+        };
+        DrawTexturePro(e->sprite_jogador, origem, destino, (Vector2){0, 0}, 0.0f, WHITE);
+        DrawText("CHICO SCIENCE", 450, 395, 16, GOLD);
+    } else {
+        DrawCircle(512, 380, 25, PURPLE);
+        DrawText("CHICO", 485, 415, 16, WHITE);
+    }
 
+    // Renderização do Inimigo Atual da Fila
     Inimigo *atual = peek_inimigo(&e->fila_ondas);
     if (atual != NULL) {
         Color cor_inimigo = (atual->id == 99) ? RED : MAROON;
@@ -103,6 +140,7 @@ void desenhar_gameplay(EstadoJogo *e) {
         DrawRectangle(412, 100, (int)(200 * perc_hp_inimigo), 15, RED);
     }
 
+    // Interface HUD / Menu de turnos inferior
     Rectangle painel_hud = { 40, 450, LARGURA - 80, 130 };
     DrawRectangleRec(painel_hud, (Color){10, 10, 15, 240});
     DrawRectangleLinesEx(painel_hud, 2, COR_TITULO);

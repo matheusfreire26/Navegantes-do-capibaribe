@@ -27,6 +27,7 @@ int main(void) {
     
     // ─── ALTERAÇÃO 1: Carrega a imagem do cenário do tutorial ────────────────
     e.cenario_fundo = LoadTexture("assets/abertura/tutorial.png");
+    e.sprite_jogador = LoadTexture("assets/personagem.png");
     e.jogador_tex = LoadTexture("assets/abertura/marco_zero.png");
 
     construir_rio(&e);
@@ -42,6 +43,7 @@ int main(void) {
     
     // ─── ALTERAÇÃO 2: Descarrega a imagem da memória ao fechar o jogo ────────
     UnloadTexture(e.cenario_fundo);
+    UnloadTexture(e.sprite_jogador);
     UnloadTexture(e.jogador_tex);
 
     for (int i = 0; i < 9; i++)
