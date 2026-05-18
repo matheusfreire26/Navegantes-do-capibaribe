@@ -22,20 +22,22 @@ void desenhar_animacao(EstadoJogo *e) {
 
 void desenhar_menu(EstadoJogo *e) {
     ClearBackground(BLACK);
-    DrawTexturePro(e->anim_frames[8],
-        (Rectangle){0, 0, (float)e->anim_frames[8].width, (float)e->anim_frames[8].height},
+    DrawTexturePro(e->anim_frames[19],
+        (Rectangle){0, 0, (float)e->anim_frames[19].width, (float)e->anim_frames[19].height},
         (Rectangle){0, 0, LARGURA, ALTURA},
         (Vector2){0, 0}, 0.0f, WHITE);
 
-    // TEMPORÁRIO — coordenadas do mouse para ajuste
-    Vector2 mouse = GetMousePosition();
-    char pos[64];
-    snprintf(pos, sizeof(pos), "X: %.0f  Y: %.0f", mouse.x, mouse.y);
-    DrawText(pos, 10, 10, 20, RED);
 }
 
 void desenhar_tutorial(EstadoJogo *e) {
     ClearBackground(BLACK);
+
+    if (e->cenario_fundo.id > 0) {
+        DrawTexturePro(e->cenario_fundo,
+            (Rectangle){0, 0, (float)e->cenario_fundo.width, (float)e->cenario_fundo.height},
+            (Rectangle){0, 0, LARGURA, ALTURA},
+            (Vector2){0, 0}, 0.0f, WHITE);
+    }
 
     // Tela preta com o texto do Manual explicativo
     int caixax = 150, caixay = 100, caixaw = 724, caixah = 400;
@@ -59,7 +61,7 @@ void desenhar_tutorial(EstadoJogo *e) {
 
 void desenhar_gameplay(EstadoJogo *e) {
     if (e->sprite_jogador.id == 0) {
-        e->sprite_jogador = LoadTexture("assets/abertura/personagem.png");
+        e->sprite_jogador = LoadTexture("assets/personagem.png");
     }
 
     // Calcula as dimensões de um único frame recortado do Chico

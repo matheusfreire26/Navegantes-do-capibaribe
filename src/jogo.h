@@ -71,7 +71,7 @@ typedef struct {
     float timer;
     Texture2D mapa;
     Font  fonte;
-    Texture2D anim_frames[9];
+    Texture2D anim_frames[20];
     int   anim_frame_atual;
     float anim_frame_timer;
     float anim_frame_duracao;  

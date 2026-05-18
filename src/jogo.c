@@ -23,11 +23,13 @@ void atualizar(EstadoJogo *e) {
     // ─── 1. ANIMAÇÃO DE ABERTURA ─────────────────────────────────────────────
     if (e->cena_atual == CENA_ANIMACAO) {
         e->anim_frame_timer += dt;
-        if (e->anim_frame_timer >= e->anim_frame_duracao) {
-            e->anim_frame_timer = 0.0f;
-            e->anim_frame_atual++;
-            if (e->anim_frame_atual >= 9) {
-                e->anim_frame_atual = 8;
+        if (e->anim_frame_atual < 19) {
+            if (e->anim_frame_timer >= e->anim_frame_duracao) {
+                e->anim_frame_timer = 0.0f;
+                e->anim_frame_atual++;
+            }
+        } else {
+            if (e->anim_frame_timer >= e->anim_duracao) {
                 e->cena_atual = CENA_MENU;
             }
         }
@@ -105,18 +107,16 @@ void atualizar(EstadoJogo *e) {
 
             // Controle da Animação das pernas caminhando
             if (movendo) {
+                if (e->jogador_frame < 3) e->jogador_frame = 3;
                 e->jogador_timer += dt;
-                if (e->jogador_timer >= 0.12f) { // Velocidade da troca de passos
+                if (e->jogador_timer >= 0.12f) {
                     e->jogador_timer = 0.0f;
                     e->jogador_frame++;
-                    
-                    // As colunas de caminhada válidas na sua folha vão da 2 até a 5
                     if (e->jogador_frame > 5) {
-                        e->jogador_frame = 2; 
+                        e->jogador_frame = 3;
                     }
                 }
             } else {
-                // Se o jogador parar, ele volta para o frame parado (Coluna 2)
                 e->jogador_frame = 2;
             }
 
