@@ -121,8 +121,4 @@ Inimigo* peek_inimigo(FilaInimigos *f);
 int fila_vazia(FilaInimigos *f);
 void limpar_fila(FilaInimigos *f);
 
-void iniciar_missao_1(EstadoJogo *e);
-void processar_input_missao1(EstadoJogo *e);
-void atualizar_missao1(EstadoJogo *e, float dt);
-
 #endif
