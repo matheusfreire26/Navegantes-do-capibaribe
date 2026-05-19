@@ -1,5 +1,5 @@
-#ifndef FASE_TORRE_CRISTAL_H
-#define FASE_TORRE_CRISTAL_H
+#ifndef DESAFIO2_H
+#define DESAFIO2_H
 
 #include "jogo.h"
 

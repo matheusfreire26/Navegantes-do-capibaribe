@@ -1,4 +1,4 @@
-#include "fase_torre_cristal.h"
+#include "desafio2.h"
 #include <string.h>
 
 void iniciar_missao_torre(EstadoJogo *e) {

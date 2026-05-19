@@ -1,5 +1,5 @@
-#ifndef FASE_MARCO_ZERO_H
-#define FASE_MARCO_ZERO_H
+#ifndef DESAFIO1_H
+#define DESAFIO1_H
 
 #include "jogo.h"
 
