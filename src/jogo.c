@@ -57,7 +57,7 @@ void atualizar(EstadoJogo *e) {
             Vector2 raw   = GetMousePosition();
             Vector2 mouse = {(raw.x - ox) / escala, (raw.y - oy) / escala};
 
-            if (mouse.x >= 510 && mouse.x <= 760 && mouse.y >= 180 && mouse.y <= 290) {
+            if (mouse.x >= 510 && mouse.x <= 760 && mouse.y >= 225 && mouse.y <= 335) {
                 e->cena_atual  = CENA_TUTORIAL;
                 e->jogador_pos = (Vector2){512, 480};
                 e->jogador_vel = 250.0f;
@@ -67,20 +67,31 @@ void atualizar(EstadoJogo *e) {
         return;
     }
 
-    // ─── 3. TELA DE TUTORIAL ─────────────────────────────────────────────────
+    // ─── 3. TELA DE TUTORIAL (Manual de Reconhecimento) ─────────────────────
     if (e->cena_atual == CENA_TUTORIAL) {
+        // Quando aperta ESPAÇO ou ENTER na tela do manual:
         if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) {
-            e->cena_atual = CENA_GAMEPLAY;
-            iniciar_missao_1(e);
+            e->cena_atual = CENA_GAMEPLAY;        // Muda para a tela do cais
+            e->mostrar_tutorial_texto = false;    // Garante que a caixinha preta SUMA
+            
+            // Inicializa o Chico no começo do cais, pronto para o tutorial de gameplay (andar)
+            e->jogador_pos = (Vector2){100, 440}; 
+            e->jogador_vel = 200.0f;
+            
+            // IMPORTANTE: Não chamamos 'iniciar_missao_1(e)' aqui para a fila de inimigos ficar VAZIA!
         }
         return;
     }
 
-    // ─── 4. FASE DE GAMEPLAY (Marco Zero) ────────────────────────────────────
+    // ─── 4. FASE DE GAMEPLAY (Cais / Marco Zero) ──────────────────────────────
     if (e->cena_atual == CENA_GAMEPLAY) {
+        
+        // Se a fila de inimigos NÃO estiver vazia, o combate circular acontece
         if (!fila_vazia(&e->fila_ondas)) {
             atualizar_missao1(e, dt);
-        } else {
+        } 
+        // TUTORIAL DE GAMEPLAY: Se a fila estiver vazia, o Chico anda livremente pelo cais
+        else {
             float velocidade = 200.0f;
             bool movendo     = false;
 
@@ -119,10 +130,17 @@ void atualizar(EstadoJogo *e) {
                 e->jogador_frame = 2;
             }
 
+            // Limites para o Chico não andar em cima da água ou sumir da tela
             if (e->jogador_pos.x < 40.0f)  e->jogador_pos.x = 40.0f;
             if (e->jogador_pos.x > 980.0f) e->jogador_pos.x = 980.0f;
             if (e->jogador_pos.y < 350.0f) e->jogador_pos.y = 350.0f;
             if (e->jogador_pos.y > 490.0f) e->jogador_pos.y = 490.0f;
+
+            // FIM DO TUTORIAL DE GAMEPLAY: Quando o jogador testar os comandos e andar 
+            // até o fim do cais (lado direito, X > 900), o Desafio 1 começa de verdade!
+            if (e->jogador_pos.x > 900.0f) {
+                iniciar_missao_1(e); // Isso preenche a fila e joga o jogador no combate circular!
+            }
         }
         return;
     }
