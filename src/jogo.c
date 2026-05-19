@@ -1,5 +1,6 @@
 #include "jogo.h"
-#include "fase_marco_zero.h"
+#include "desafio1.h"
+#include "desafio3.h"
 #include <math.h>
 
 void processar_input(EstadoJogo *e) {
@@ -7,6 +8,7 @@ void processar_input(EstadoJogo *e) {
         if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) remar_frente(e);
         if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT))  remar_volta(e);
     }
+
     if (e->cena_atual == CENA_GAMEPLAY) {
         if (fila_vazia(&e->fila_ondas)) {
             if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  e->jogador_pos.x -= e->jogador_vel * GetFrameTime();
@@ -14,6 +16,10 @@ void processar_input(EstadoJogo *e) {
         } else {
             processar_input_missao1(e);
         }
+    }
+
+    if (e->cena_atual == CENA_PONTE) {
+        processar_input_ponte(e);
     }
 }
 
@@ -44,15 +50,14 @@ void atualizar(EstadoJogo *e) {
             float escala = fminf((float)sw / LARGURA, (float)sh / ALTURA);
             float ox = (sw - LARGURA * escala) / 2.0f;
             float oy = (sh - ALTURA * escala) / 2.0f;
-            Vector2 raw = GetMousePosition();
+            Vector2 raw   = GetMousePosition();
             Vector2 mouse = {(raw.x - ox) / escala, (raw.y - oy) / escala};
 
-            // Clique ajustado para a região do botão Iniciar (com base nas suas coordenadas)
             if (mouse.x >= 510 && mouse.x <= 760 && mouse.y >= 180 && mouse.y <= 290) {
-                e->cena_atual = CENA_TUTORIAL; 
-                e->jogador_pos = (Vector2){ 512, 480 }; 
-                e->jogador_vel = 250.0f; 
-                e->timer = 0.0f; 
+                e->cena_atual  = CENA_TUTORIAL;
+                e->jogador_pos = (Vector2){512, 480};
+                e->jogador_vel = 250.0f;
+                e->timer       = 0.0f;
             }
         }
         return;
@@ -62,95 +67,99 @@ void atualizar(EstadoJogo *e) {
     if (e->cena_atual == CENA_TUTORIAL) {
         if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) {
             e->cena_atual = CENA_GAMEPLAY;
+            iniciar_missao_1(e);
         }
         return;
     }
 
-    // ─── 4. FASE DE GAMEPLAY ─────────────────────────────────────────────────
-    // ─── 4. FASE DE GAMEPLAY ─────────────────────────────────────────────────
+    // ─── 4. FASE DE GAMEPLAY (Marco Zero) ────────────────────────────────────
     if (e->cena_atual == CENA_GAMEPLAY) {
         if (!fila_vazia(&e->fila_ondas)) {
-            // Se tiver inimigos na fila, roda a lógica de combate do seu amigo
             atualizar_missao1(e, dt);
         } else {
-            // ─── MOVIMENTAÇÃO DO CHICO NO CAIS (Fila Vazia) ───
-            float velocidade = 200.0f; // Velocidade em pixels por segundo
-            bool movendo = false;
+            float velocidade = 200.0f;
+            bool movendo     = false;
 
-            // Se as variáveis de animação não existirem na struct, a Raylib cria esses campos sem travar,
-            // mas por segurança garantimos que comecem com valores válidos:
-            if (e->jogador_frame < 2 || e->jogador_frame > 5) {
-                e->jogador_frame = 2; // Coluna 2 é o Chico visível parado
-            }
+            if (e->jogador_frame < 2 || e->jogador_frame > 5)
+                e->jogador_frame = 2;
 
-            // Ler as teclas de direção (Setas ou WASD)
             if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
-                e->jogador_pos.x += velocidade * dt;
-                e->jogador_direcao = 2; // Linha 2 (Direita)
-                movendo = true;
-            }
-            else if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
-                e->jogador_pos.x -= velocidade * dt;
-                e->jogador_direcao = 3; // Código 3 (vamos usar para espelhar a direita no render.c)
-                movendo = true;
+                e->jogador_pos.x  += velocidade * dt;
+                e->jogador_direcao = 2;
+                movendo            = true;
+            } else if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
+                e->jogador_pos.x  -= velocidade * dt;
+                e->jogador_direcao = 3;
+                movendo            = true;
             }
 
             if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) {
-                e->jogador_pos.y += velocidade * dt;
-                e->jogador_direcao = 0; // Linha 0 (Frente)
-                movendo = true;
-            }
-            else if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) {
-                e->jogador_pos.y -= velocidade * dt;
-                e->jogador_direcao = 1; // Linha 1 (Costas)
-                movendo = true;
+                e->jogador_pos.y  += velocidade * dt;
+                e->jogador_direcao = 0;
+                movendo            = true;
+            } else if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W)) {
+                e->jogador_pos.y  -= velocidade * dt;
+                e->jogador_direcao = 1;
+                movendo            = true;
             }
 
-            // Controle da Animação das pernas caminhando
             if (movendo) {
                 if (e->jogador_frame < 3) e->jogador_frame = 3;
                 e->jogador_timer += dt;
                 if (e->jogador_timer >= 0.12f) {
                     e->jogador_timer = 0.0f;
                     e->jogador_frame++;
-                    if (e->jogador_frame > 5) {
-                        e->jogador_frame = 3;
-                    }
+                    if (e->jogador_frame > 5) e->jogador_frame = 3;
                 }
             } else {
                 e->jogador_frame = 2;
             }
 
-            /// Bloqueio físico exato para o cais do vídeo
-            if (e->jogador_pos.x < 40.0f)   e->jogador_pos.x = 40.0f;  // Canto esquerdo
-            if (e->jogador_pos.x < 40.0f)   e->jogador_pos.x = 40.0f;  // Canto esquerdo
-            if (e->jogador_pos.x > 980.0f)  e->jogador_pos.x = 980.0f; // Canto direito
-            if (e->jogador_pos.y < 350.0f)  e->jogador_pos.y = 350.0f; // Limite perto da mureta/água
-            if (e->jogador_pos.y > 490.0f)  e->jogador_pos.y = 490.0f; // Limite antes de sumir nas plantas de baixo
+            if (e->jogador_pos.x < 40.0f)  e->jogador_pos.x = 40.0f;
+            if (e->jogador_pos.x > 980.0f) e->jogador_pos.x = 980.0f;
+            if (e->jogador_pos.y < 350.0f) e->jogador_pos.y = 350.0f;
+            if (e->jogador_pos.y > 490.0f) e->jogador_pos.y = 490.0f;
         }
         return;
     }
 
-    // ─── 5. MAPA DO RIO ──────────────────────────────────────────────────────
+    // ─── 5. FASE DA PONTE ────────────────────────────────────────────────────
+    if (e->cena_atual == CENA_PONTE) {
+        atualizar_ponte(e, dt);
+        return;
+    }
+
+    // ─── 6. MAPA DO RIO ──────────────────────────────────────────────────────
     if (e->cena_atual == CENA_MAPA) {
         float alvo_y = e->atual->pos.y - 20.0f;
         e->barco_x  += (e->barco_alvo_x - e->barco_x) * 5.0f * dt;
         e->barco_y  += (alvo_y          - e->barco_y) * 5.0f * dt;
         if (fabsf(e->barco_x - e->barco_alvo_x) < 1.0f)
             e->animando = false;
+
+        // Ao chegar em um nó não visitado, inicia a fase correspondente
+        if (!e->animando && e->atual != NULL && !e->atual->visitado) {
+            // Nó 1 = Marco Zero (CENA_GAMEPLAY já cuida)
+            // Nó 2 = Ponte Giratória
+            if (e->atual == e->cabeca->proximo) {
+                iniciar_missao_ponte(e);
+                e->cena_atual = CENA_PONTE;
+            }
+        }
     }
 }
 
 void renderizar(EstadoJogo *e) {
     BeginTextureMode(e->target);
-    
-    if (e->cena_atual == CENA_ANIMACAO)      desenhar_animacao(e);
-    else if (e->cena_atual == CENA_MENU)     desenhar_menu(e);
-    else if (e->cena_atual == CENA_TUTORIAL) desenhar_tutorial(e);
-    else if (e->cena_atual == CENA_GAMEPLAY) desenhar_gameplay(e);
-    else if (e->cena_atual == CENA_MAPA)     desenhar_mapa(e);
-    else                                     ClearBackground(BLACK);
-    
+
+    if      (e->cena_atual == CENA_ANIMACAO)  desenhar_animacao(e);
+    else if (e->cena_atual == CENA_MENU)      desenhar_menu(e);
+    else if (e->cena_atual == CENA_TUTORIAL)  desenhar_tutorial(e);
+    else if (e->cena_atual == CENA_GAMEPLAY)  desenhar_gameplay(e);
+    else if (e->cena_atual == CENA_PONTE)     desenhar_ponte(e);
+    else if (e->cena_atual == CENA_MAPA)      desenhar_mapa(e);
+    else                                      ClearBackground(BLACK);
+
     DrawFPS(LARGURA - 70, 8);
     EndTextureMode();
 
@@ -170,22 +179,23 @@ void renderizar(EstadoJogo *e) {
     EndDrawing();
 }
 
+// ─── Fila ────────────────────────────────────────────────────────────────────
 void inicializar_fila(FilaInimigos *f) {
-    f->frente = NULL;
-    f->tras = NULL;
+    f->frente  = NULL;
+    f->tras    = NULL;
     f->tamanho = 0;
 }
 
 void enqueue_inimigo(FilaInimigos *f, Inimigo info) {
     NodeInimigo *novo = (NodeInimigo*)malloc(sizeof(NodeInimigo));
-    novo->dado = info;
-    novo->proximo = NULL;
+    novo->dado     = info;
+    novo->proximo  = NULL;
     if (f->tras == NULL) {
         f->frente = novo;
-        f->tras = novo;
+        f->tras   = novo;
     } else {
         f->tras->proximo = novo;
-        f->tras = novo;
+        f->tras          = novo;
     }
     f->tamanho++;
 }
@@ -194,9 +204,7 @@ void dequeue_inimigo(FilaInimigos *f) {
     if (f->frente == NULL) return;
     NodeInimigo *temp = f->frente;
     f->frente = f->frente->proximo;
-    if (f->frente == NULL) {
-        f->tras = NULL;
-    }
+    if (f->frente == NULL) f->tras = NULL;
     free(temp);
     f->tamanho--;
 }
@@ -211,8 +219,5 @@ int fila_vazia(FilaInimigos *f) {
 }
 
 void limpar_fila(FilaInimigos *f) {
-    while (!fila_vazia(f)) {
-        dequeue_inimigo(f);
-    }
+    while (!fila_vazia(f)) dequeue_inimigo(f);
 }
-
