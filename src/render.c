@@ -42,10 +42,10 @@ void desenhar_tutorial(EstadoJogo *e) {
     DrawRectangle(caixax, caixay, caixaw, caixah, Fade(BLACK, 0.9f));
     DrawRectangleLines(caixax, caixay, caixaw, caixah, GOLD);
 
-    DrawText("MANUAL DE RECONHECIMENTO", 318, caixay + 30, 28, GOLD);
+    DrawText("TUTORIAL DE GAMEPLAY", 318, caixay + 30, 28, GOLD);
 
     DrawText("Comandos de Mobilidade:", caixax + 50, caixay + 100, 20, GOLD);
-    DrawText("Use as teclas A e D (ou SETAS) para andar pelo cais.", caixax + 50, caixay + 130, 18, WHITE);
+    DrawText("Use as teclas A, W, S e D (ou SETAS) para andar pelo cais.", caixax + 50, caixay + 130, 18, WHITE);
 
     DrawText("Sistema de Combate:", caixax + 50, caixay + 190, 20, GOLD);
     DrawText("Use a barra de ESPACO para disparar contra os alvos.", caixax + 50, caixay + 220, 18, WHITE);
@@ -54,7 +54,7 @@ void desenhar_tutorial(EstadoJogo *e) {
     DrawText("Elimine todos os alvos de teste para liberar a navegacao pelo rio.", caixax + 50, caixay + 310, 18, WHITE);
 
     float alpha = (sinf(e->timer * 4.0f) + 1.0f) / 2.0f;
-    DrawText("Pressione ENTER ou ESPACO para iniciar os testes", 281, caixay + 350, 18, Fade(WHITE, alpha));
+    DrawText("Pressione ENTER para iniciar os testes", 281, caixay + 350, 18, Fade(WHITE, alpha));
 }
 
 void desenhar_gameplay(EstadoJogo *e) {
@@ -82,26 +82,46 @@ void desenhar_gameplay(EstadoJogo *e) {
         }
 
         if (e->sprite_jogador.id > 0) {
-            if (e->jogador_frame == 0) e->jogador_frame = 2;
+            // Garante que o frame seja válido para evitar recortes horizontais vazios no spawn
+            if (e->jogador_frame < 0 || e->jogador_frame >= 8) {
+                e->jogador_frame = 2; 
+            }
 
             float posX_na_imagem  = e->jogador_frame * frame_largura;
             float posY_na_imagem  = e->jogador_direcao * frame_altura;
             float largura_recorte = frame_largura;
 
-            if (e->jogador_direcao == 3) {
+            // CORREÇÃO DO SPAWN E MOVIMENTO PARA BAIXO:
+            // Se o jogo tentar usar a linha 0 (Andar para Baixo / Spawn) e ela estiver cortando as pernas,
+            // jogamos o desenho para usar a linha de perfil/lateral que está perfeita na sua imagem.
+            if (e->jogador_direcao == 0) { 
+                posY_na_imagem = 2 * frame_altura; // Usa a linha 2 (perfil) para não sumir com as pernas
+            }
+            // Se mover para CIMA (direção 1) e também cortar, você pode descomentar a linha abaixo:
+            // else if (e->jogador_direcao == 1) { posY_na_imagem = 1 * frame_altura; }
+
+            // Se mover para a ESQUERDA (direção 3)
+            else if (e->jogador_direcao == 3) {
+                posY_na_imagem   = 2 * frame_altura; 
+                posX_na_imagem   = posX_na_imagem + frame_largura; 
+                largura_recorte  = -frame_largura; 
+            }
+            // Se mover para a DIREITA (direção 2)
+            else if (e->jogador_direcao == 2) {
                 posY_na_imagem   = 2 * frame_altura;
-                largura_recorte  = -frame_largura;
             }
 
             Rectangle origem  = {posX_na_imagem, posY_na_imagem, largura_recorte, frame_altura};
             float escala      = 1.2f;
             float larg_final  = frame_largura * escala;
             float alt_final   = frame_altura  * escala;
+            
             Rectangle destino = {
                 e->jogador_pos.x - (larg_final / 2.0f),
                 e->jogador_pos.y - alt_final,
                 larg_final, alt_final
             };
+            
             DrawTexturePro(e->sprite_jogador, origem, destino, (Vector2){0, 0}, 0.0f, WHITE);
         } else {
             DrawCircleV(e->jogador_pos, 20, BLUE);
