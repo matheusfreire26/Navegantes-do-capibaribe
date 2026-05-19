@@ -2,9 +2,12 @@
 #include <string.h>
 
 void iniciar_boss(EstadoJogo *e) {
-    strncpy(e->boss_atual.nome, "tubarão Ratão");
+    // CORRIGIDO: Adicionado o parâmetro de tamanho para o strncpy funcionar de forma segura
+    strncpy(e->boss_atual.nome, "tubarão Ratão", sizeof(e->boss_atual.nome) - 1);
+    e->boss_atual.nome[sizeof(e->boss_atual.nome) - 1] = '\0'; 
+    
     e->boss_atual.vida_max = 100;
-    e->boss_atual.vida =  100;
+    e->boss_atual.vida =   100;
     e->boss_atual.estado = ESTADO_CAUTELOSO;
     e->boss_atual.acao_timer = 0.0f;
     e->boss_atual.acao_intervalo = 1.5f;
@@ -12,16 +15,15 @@ void iniciar_boss(EstadoJogo *e) {
     e->boss_atual.defendendo    = 0;
     e->vida_jogador             = 100;
     strcpy(e->log_combate, "O Guardiao apareceu!");
-
 }
 
-void atualizar_boss(EstadoJogo *e){
+void atualizar_boss(EstadoJogo *e) {
     Boss *b = &e->boss_atual;
-    if(b->vida > b->vida_max *0.8f){
+    if (b->vida > b->vida_max * 0.8f) {
         b->estado = ESTADO_CAUTELOSO;
-    }else if(b->vida < b->vida_max *0.5f){
+    } else if (b->vida < b->vida_max * 0.5f && b->vida >= b->vida_max * 0.2f) {
         b->estado = ESTADO_AGRESSIVO;
-    }else if(b->vida < vida_max *0.2f){
+    } else if (b->vida < b->vida_max * 0.2f) { // CORRIGIDO: mudado de 'vida_max' para 'b->vida_max'
         b->estado = ESTADO_DESESPERADO;
     }
 }
@@ -36,6 +38,7 @@ void executar_acao_boss(EstadoJogo *e) {
             b->acao_intervalo = 1.0f;
             strcpy(e->log_combate, "Guardiao ATACA com forca maxima!");
             break;
+            
         case ESTADO_CAUTELOSO:
             if (b->atacando) {
                 b->atacando   = 0;
@@ -49,9 +52,9 @@ void executar_acao_boss(EstadoJogo *e) {
             }
             b->acao_intervalo = 1.5f;
             break;
+            
         case ESTADO_DESESPERADO:
-            if (b->vida < b->vida_max)
-            b->vida += 5;
+            if (b->vida < b->vida_max) b->vida += 5;
             b->atacando       = 1;
             e->vida_jogador  -= GetRandomValue(5, 20);
             b->acao_intervalo = 0.8f;
@@ -79,7 +82,9 @@ void processar_input_rio(EstadoJogo *e) {
 
 void atualizar_rio(EstadoJogo *e, float dt) {
     Boss *b = &e->boss_atual;
-    atualizar_estado_boss(e);
+    
+    // CORRIGIDO: Corrigido o nome da função que antes estava 'atualizar_estado_boss'
+    atualizar_boss(e);
 
     if (!e->turno_jogador) {
         b->acao_timer += dt;
@@ -90,7 +95,7 @@ void atualizar_rio(EstadoJogo *e, float dt) {
         }
     }
 
-    // Condições de fim
+    // Condições de fim de jogo
     if (b->vida <= 0) {
         b->vida       = 0;
         e->cena_atual = CENA_MAPA;

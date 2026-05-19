@@ -21,16 +21,15 @@
 #define COR_BARCO       (Color){200, 140, 60,  255}
 #define COR_FUNDO       (Color){0,   0,   0,   255}
 
-// ─── Cenas ───────────────────────────────────────────────────────────────────
+// ─── Cenas Corrigidas (Com a vírgula inserida) ──────────────────────────────
 typedef enum {
     CENA_ANIMACAO,
     CENA_MENU,
     CENA_MAPA,
     CENA_TUTORIAL,
     CENA_GAMEPLAY,
-    CENA_PONTE
+    CENA_PONTE,          // <- Vírgula adicionada aqui!
     CENA_DESAFIO_FINAL
-
 } Cena;
 
 // ─── Inimigo ─────────────────────────────────────────────────────────────────
@@ -63,6 +62,25 @@ typedef struct PontoTuristico {
     struct PontoTuristico *anterior;
     struct PontoTuristico *proximo;
 } PontoTuristico;
+
+// ─── Definições do Boss (Movidas para CIMA do Estado do Jogo) ────────────────
+typedef enum {
+    ESTADO_AGRESSIVO,
+    ESTADO_CAUTELOSO,
+    ESTADO_DESESPERADO
+} EstadoBoss;
+
+typedef struct {
+    char nome[50];
+    int  vida;
+    int  vida_max;
+    float x, y;
+    EstadoBoss estado;
+    float acao_timer;    
+    float acao_intervalo;
+    int   atacando;
+    int   defendendo;
+} Boss;
 
 // ─── Estado global do jogo ───────────────────────────────────────────────────
 typedef struct {
@@ -118,32 +136,14 @@ typedef struct {
     Texture2D tex_rachadura;
     Vector2 ponte_pos_rachaduras[5];
 
-    //boss
+    // Sub-sistema do Boss Final (Agora o compilador sabe o que é Boss!)
     Boss boss_atual;
     int  vida_jogador;
+    
+    // Controle do novo Tutorial sobreposto no Cais
+    bool mostrar_tutorial_texto; 
 
 } EstadoJogo;
-
-typedef enum {
-    ESTADO_AGRESSIVO,
-    ESTADO_CAUTELOSO,
-    ESTADO_DESESPERADO
-} EstadoBoss;
-
-typedef struct {
-    char nome[50];
-    int  vida;
-    int  vida_max;
-    float x, y;
-    EstadoBoss estado;
-    float acao_timer;    
-    float acao_intervalo;
-    int   atacando;
-    int   defendendo;
-} Boss;
-
-
-
 
 // ─── Funções - Lista ─────────────────────────────────────────────────────────
 PontoTuristico *criar_parada(const char *nome, const char *subtitulo,
