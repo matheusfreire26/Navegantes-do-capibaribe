@@ -160,6 +160,7 @@ void desenhar_tutorial(EstadoJogo *e);
 void desenhar_gameplay(EstadoJogo *e);
 void desenhar_mapa(EstadoJogo *e);
 void desenhar_ponte(EstadoJogo *e);
+void desenhar_desafio_final(EstadoJogo *e);
 
 // ─── Funções - Jogo ──────────────────────────────────────────────────────────
 void processar_input(EstadoJogo *e);

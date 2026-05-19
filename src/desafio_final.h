@@ -6,5 +6,7 @@
 void iniciar_missao_rio(EstadoJogo *e);
 void processar_input_rio(EstadoJogo *e);
 void atualizar_rio(EstadoJogo *e, float dt);
+void atualizar_estado_boss(EstadoJogo *e);
+void executar_acao_boss(EstadoJogo *e);
 
 #endif

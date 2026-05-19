@@ -1,6 +1,7 @@
 #include "jogo.h"
 #include "desafio1.h"
 #include "desafio3.h"
+#include "desafio_final.h"
 #include <math.h>
 
 void processar_input(EstadoJogo *e) {
@@ -21,6 +22,9 @@ void processar_input(EstadoJogo *e) {
     if (e->cena_atual == CENA_PONTE) {
         processar_input_ponte(e);
     }
+
+    if (e->cena_atual == CENA_DESAFIO_FINAL)
+        processar_input_rio(e);
 }
 
 void atualizar(EstadoJogo *e) {
@@ -129,7 +133,13 @@ void atualizar(EstadoJogo *e) {
         return;
     }
 
-    // ─── 6. MAPA DO RIO ──────────────────────────────────────────────────────
+    // ─── 6. DESAFIO FINAL ────────────────────────────────────────────────────
+    if (e->cena_atual == CENA_DESAFIO_FINAL) {
+        atualizar_rio(e, dt);
+        return;
+    }
+
+    // ─── 7. MAPA DO RIO ──────────────────────────────────────────────────────
     if (e->cena_atual == CENA_MAPA) {
         float alvo_y = e->atual->pos.y - 20.0f;
         e->barco_x  += (e->barco_alvo_x - e->barco_x) * 5.0f * dt;
@@ -156,8 +166,9 @@ void renderizar(EstadoJogo *e) {
     else if (e->cena_atual == CENA_MENU)      desenhar_menu(e);
     else if (e->cena_atual == CENA_TUTORIAL)  desenhar_tutorial(e);
     else if (e->cena_atual == CENA_GAMEPLAY)  desenhar_gameplay(e);
-    else if (e->cena_atual == CENA_PONTE)     desenhar_ponte(e);
-    else if (e->cena_atual == CENA_MAPA)      desenhar_mapa(e);
+    else if (e->cena_atual == CENA_PONTE)         desenhar_ponte(e);
+    else if (e->cena_atual == CENA_DESAFIO_FINAL) desenhar_desafio_final(e);
+    else if (e->cena_atual == CENA_MAPA)          desenhar_mapa(e);
     else                                      ClearBackground(BLACK);
 
     DrawFPS(LARGURA - 70, 8);

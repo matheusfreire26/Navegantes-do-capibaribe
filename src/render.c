@@ -263,3 +263,37 @@ void desenhar_ponte(EstadoJogo *e) {
     // Controles
     DrawText("[ESPACO] Atacar  [1-5] Reparar posicao  [R] Recarregar guitarra", 60, 558, 14, GRAY);
 }
+
+void desenhar_desafio_final(EstadoJogo *e) {
+    ClearBackground(BLACK);
+
+    // Barras de vida
+    DrawText("GUARDIAO DO CAPIBARIBE", 300, 30, 24, GOLD);
+
+    // Vida do boss
+    DrawRectangle(50, 80, 400, 25, DARKGRAY);
+    DrawRectangle(50, 80, (int)(400 * ((float)e->boss_atual.vida / e->boss_atual.vida_max)), 25, RED);
+    DrawText("Boss", 50, 58, 16, WHITE);
+
+    // Vida do jogador
+    DrawRectangle(574, 80, 400, 25, DARKGRAY);
+    DrawRectangle(574, 80, (int)(400 * ((float)e->vida_jogador / 100)), 25, GREEN);
+    DrawText("Voce", 574, 58, 16, WHITE);
+
+    // Estado do boss
+    const char *estado_txt =
+        e->boss_atual.estado == ESTADO_AGRESSIVO   ? "AGRESSIVO"   :
+        e->boss_atual.estado == ESTADO_CAUTELOSO   ? "CAUTELOSO"   :
+                                                      "DESESPERADO";
+    DrawText(estado_txt, 450, 120, 18, ORANGE);
+
+    // Log de combate
+    DrawRectangle(50, 520, 924, 50, (Color){0,0,0,180});
+    DrawText(e->log_combate, 60, 535, 16, YELLOW);
+
+    // Instrução
+    const char *instrucao = e->turno_jogador ?
+        "[A] Ataque forte (-20)   [D] Ataque rapido (-8)" :
+        "Aguarde o inimigo...";
+    DrawText(instrucao, 250, 480, 16, WHITE);
+}
