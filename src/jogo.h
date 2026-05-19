@@ -27,9 +27,11 @@ typedef enum {
     CENA_MENU,
     CENA_MAPA,
     CENA_TUTORIAL,
-    CENA_GAMEPLAY
+    CENA_GAMEPLAY,
+    CENA_PONTE
 } Cena;
 
+// ─── Inimigo ─────────────────────────────────────────────────────────────────
 typedef struct Inimigo {
     int id;
     int hp;
@@ -69,24 +71,30 @@ typedef struct {
     float barco_alvo_x;
     bool  animando;
     float timer;
+
     Texture2D mapa;
     Font  fonte;
     Texture2D anim_frames[20];
     int   anim_frame_atual;
     float anim_frame_timer;
-    float anim_frame_duracao;  
+    float anim_frame_duracao;
     float anim_duracao;
+
     Cena  cena_atual;
     int   menu_opcao;
     RenderTexture2D target;
+
+    // Jogador
     Vector2 jogador_pos;
-    float jogador_vel;
+    float   jogador_vel;
     Texture2D jogador_tex;
     Texture2D cenario_fundo;
     Texture2D sprite_jogador;
-    int jogador_frame;
-    int jogador_direcao;
+    int   jogador_frame;
+    int   jogador_direcao;
     float jogador_timer;
+
+    // Combate geral
     int chico_hp;
     int chico_hp_max;
     FilaInimigos fila_ondas;
@@ -94,8 +102,23 @@ typedef struct {
     char log_combate[128];
     float tempo_missao;
     int casaroes_salvos;
+
+    // ─── Desafio 3 - Ponte Giratória ─────────────────────────────────────────
+    int ponte_posicoes[5];
+    int ponte_rachaduras;
+    int ponte_turno_sabotador;
+    int guitarra_energia;
+    int guitarra_energia_max;
+    int sabotador_hp;
+    int sabotador_hp_max;
+    int sabotador_dano;
+    Texture2D cenario_ponte;
+    Texture2D tex_rachadura;
+    Vector2 ponte_pos_rachaduras[5];
+
 } EstadoJogo;
 
+// ─── Funções - Lista ─────────────────────────────────────────────────────────
 PontoTuristico *criar_parada(const char *nome, const char *subtitulo,
                               const char *artefato, Vector2 pos);
 void construir_rio(EstadoJogo *e);
@@ -103,17 +126,20 @@ void liberar_rio(EstadoJogo *e);
 void remar_frente(EstadoJogo *e);
 void remar_volta(EstadoJogo *e);
 
+// ─── Funções - Render ────────────────────────────────────────────────────────
 void desenhar_animacao(EstadoJogo *e);
 void desenhar_menu(EstadoJogo *e);
-
 void desenhar_tutorial(EstadoJogo *e);
 void desenhar_gameplay(EstadoJogo *e);
 void desenhar_mapa(EstadoJogo *e);
+void desenhar_ponte(EstadoJogo *e);
 
+// ─── Funções - Jogo ──────────────────────────────────────────────────────────
 void processar_input(EstadoJogo *e);
 void atualizar(EstadoJogo *e);
 void renderizar(EstadoJogo *e);
 
+// ─── Funções - Fila ──────────────────────────────────────────────────────────
 void inicializar_fila(FilaInimigos *f);
 void enqueue_inimigo(FilaInimigos *f, Inimigo info);
 void dequeue_inimigo(FilaInimigos *f);
