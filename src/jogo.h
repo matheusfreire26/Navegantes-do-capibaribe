@@ -29,6 +29,8 @@ typedef enum {
     CENA_TUTORIAL,
     CENA_GAMEPLAY,
     CENA_PONTE
+    CENA_DESAFIO_FINAL
+
 } Cena;
 
 // ─── Inimigo ─────────────────────────────────────────────────────────────────
@@ -116,7 +118,32 @@ typedef struct {
     Texture2D tex_rachadura;
     Vector2 ponte_pos_rachaduras[5];
 
+    //boss
+    Boss boss_atual;
+    int  vida_jogador;
+
 } EstadoJogo;
+
+typedef enum {
+    ESTADO_AGRESSIVO,
+    ESTADO_CAUTELOSO,
+    ESTADO_DESESPERADO
+} EstadoBoss;
+
+typedef struct {
+    char nome[50];
+    int  vida;
+    int  vida_max;
+    float x, y;
+    EstadoBoss estado;
+    float acao_timer;    
+    float acao_intervalo;
+    int   atacando;
+    int   defendendo;
+} Boss;
+
+
+
 
 // ─── Funções - Lista ─────────────────────────────────────────────────────────
 PontoTuristico *criar_parada(const char *nome, const char *subtitulo,
